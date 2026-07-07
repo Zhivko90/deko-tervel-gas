@@ -103,30 +103,6 @@ export default function Gallery() {
             </svg>
           </button>
 
-          {/* Назад */}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); prev(); }}
-            aria-label="Предишна"
-            className="absolute left-2 top-1/2 z-[120] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-lg border border-white/25 bg-asphalt-900/80 text-paper transition-colors hover:border-amber hover:text-amber sm:left-6"
-          >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-
-          {/* Напред */}
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); next(); }}
-            aria-label="Следваща"
-            className="absolute right-2 top-1/2 z-[120] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-lg border border-white/25 bg-asphalt-900/80 text-paper transition-colors hover:border-amber hover:text-amber sm:right-6"
-          >
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </button>
-
           {/* Снимката (плъзгане с пръст сменя) */}
           <div
             className="relative z-[105] h-[72vh] w-[88vw] max-w-5xl"
