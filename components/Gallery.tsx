@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { gallery } from "@/lib/data";
 import Reveal from "./Reveal";
 
 export default function Gallery() {
   const [index, setIndex] = useState<number | null>(null);
+  const touchX = useRef<number | null>(null);
 
   const close = useCallback(() => setIndex(null), []);
   const prev = useCallback(
@@ -18,7 +19,6 @@ export default function Gallery() {
     []
   );
 
-  // Клавиши: Esc за затваряне, стрелки за навигация
   useEffect(() => {
     if (index === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -33,6 +33,20 @@ export default function Gallery() {
       document.body.style.overflow = "";
     };
   }, [index, close, prev, next]);
+
+  // Плъзгане с пръст
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchX.current = e.touches[0].clientX;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    if (Math.abs(dx) > 45) {
+      if (dx > 0) prev();
+      else next();
+    }
+    touchX.current = null;
+  };
 
   const active = index === null ? null : gallery[index];
 
@@ -69,10 +83,10 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* Голям преглед на снимката */}
+      {/* Голям преглед */}
       {active && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-asphalt-900/95 p-4 backdrop-blur"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-asphalt-900/95 backdrop-blur"
           onClick={close}
           role="dialog"
           aria-modal="true"
@@ -80,11 +94,11 @@ export default function Gallery() {
           {/* Затвори */}
           <button
             type="button"
-            onClick={close}
+            onClick={(e) => { e.stopPropagation(); close(); }}
             aria-label="Затвори"
-            className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-lg border border-white/20 text-paper transition-colors hover:border-amber hover:text-amber"
+            className="absolute right-4 top-4 z-[120] grid h-12 w-12 place-items-center rounded-lg border border-white/25 bg-asphalt-900/80 text-paper transition-colors hover:border-amber hover:text-amber"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
@@ -94,9 +108,9 @@ export default function Gallery() {
             type="button"
             onClick={(e) => { e.stopPropagation(); prev(); }}
             aria-label="Предишна"
-            className="absolute left-3 grid h-12 w-12 place-items-center rounded-lg border border-white/20 text-paper transition-colors hover:border-amber hover:text-amber sm:left-6"
+            className="absolute left-2 top-1/2 z-[120] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-lg border border-white/25 bg-asphalt-900/80 text-paper transition-colors hover:border-amber hover:text-amber sm:left-6"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
@@ -106,17 +120,19 @@ export default function Gallery() {
             type="button"
             onClick={(e) => { e.stopPropagation(); next(); }}
             aria-label="Следваща"
-            className="absolute right-3 grid h-12 w-12 place-items-center rounded-lg border border-white/20 text-paper transition-colors hover:border-amber hover:text-amber sm:right-6"
+            className="absolute right-2 top-1/2 z-[120] grid h-12 w-12 -translate-y-1/2 place-items-center rounded-lg border border-white/25 bg-asphalt-900/80 text-paper transition-colors hover:border-amber hover:text-amber sm:right-6"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
 
-          {/* Самата снимка */}
+          {/* Снимката (плъзгане с пръст сменя) */}
           <div
-            className="relative h-[80vh] w-full max-w-5xl"
+            className="relative z-[105] h-[72vh] w-[88vw] max-w-5xl"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
           >
             <Image
               src={active.src}
@@ -126,6 +142,11 @@ export default function Gallery() {
               className="object-contain"
             />
           </div>
+
+          {/* Брояч */}
+          <span className="absolute bottom-4 left-1/2 z-[120] -translate-x-1/2 rounded-lg bg-asphalt-900/80 px-3 py-1 font-mono text-xs text-paper">
+            {index! + 1} / {gallery.length}
+          </span>
         </div>
       )}
     </section>
